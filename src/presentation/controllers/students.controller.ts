@@ -27,7 +27,12 @@ export class StudentsController {
       if (!validation.success) {
         throw new ValidationError(validation.error.errors.map(e => e.message).join(', '))
       }
-      const result = await this.createStudentUseCase.execute(validation.data)
+      // Map dni to documentId for the use case
+      const input = {
+        ...validation.data,
+        documentId: validation.data.dni,
+      }
+      const result = await this.createStudentUseCase.execute(input)
       await auditService.record({ userId: req.user?.userId, action: 'CREATE', entityType: 'Student', entityId: result.id })
       res.status(201).json(result)
     } catch (err) {
