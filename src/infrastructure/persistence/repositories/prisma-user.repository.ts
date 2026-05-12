@@ -36,6 +36,14 @@ export class PrismaUserRepository implements UserRepository {
     })
   }
 
+  async linkStudent(userId: string, studentId: string): Promise<void> {
+    await this.prisma.studentUser.create({ data: { userId, studentId } })
+  }
+
+  async linkTeacher(userId: string, teacherId: string): Promise<void> {
+    await this.prisma.teacherUser.create({ data: { userId, teacherId } })
+  }
+
   private toDomain(row: { id: string; email: string; passwordHash: string; role: string; isActive: boolean; lastLogin: Date | null; createdAt: Date; updatedAt: Date }): User {
     return User.create({
       id: row.id,

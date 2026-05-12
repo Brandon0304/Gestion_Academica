@@ -5,6 +5,7 @@ export interface CreateTeacherInput {
   documentId: string
   specialty?: string
   degree?: string
+  password?: string
 }
 
 export interface UpdateTeacherInput {

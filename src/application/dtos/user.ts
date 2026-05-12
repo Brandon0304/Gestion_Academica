@@ -1,3 +1,9 @@
+export interface CreateUserInput {
+  email: string
+  password: string
+  role: 'admin' | 'directive' | 'teacher' | 'student' | 'secretary'
+}
+
 export interface UserOutput {
   id: string
   email: string

@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { CreateStudentUseCase } from './create-student.use-case.js'
 import { ListStudentsUseCase } from './list-students.use-case.js'
 import { InMemoryStudentRepository } from '../../../infrastructure/persistence/repositories/in-memory/in-memory-student.repository.js'
+import { InMemoryUserRepository } from '../../../infrastructure/persistence/repositories/in-memory/in-memory-user.repository.js'
+
+const mockPasswordHasher = {
+  hash: async (p: string) => p,
+  compare: async (p: string, h: string) => p === h,
+}
 
 describe('ListStudentsUseCase', () => {
   let repo: InMemoryStudentRepository
@@ -10,7 +16,7 @@ describe('ListStudentsUseCase', () => {
   beforeEach(async () => {
     repo = new InMemoryStudentRepository()
     listUseCase = new ListStudentsUseCase(repo)
-    const create = new CreateStudentUseCase(repo)
+    const create = new CreateStudentUseCase(repo, new InMemoryUserRepository(), mockPasswordHasher)
 
     for (let i = 0; i < 5; i++) {
       await create.execute({ firstName: `S${i}`, lastName: 'Test', email: `s${i}@test.com`, documentId: `DOC-${i}000` })

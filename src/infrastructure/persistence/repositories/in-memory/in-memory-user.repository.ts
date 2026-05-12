@@ -5,6 +5,8 @@ import { Email } from '../../../../domain/value-objects/email.js'
 
 export class InMemoryUserRepository implements UserRepository {
   private users: Map<string, User> = new Map()
+  private studentLinks: Map<string, string> = new Map()
+  private teacherLinks: Map<string, string> = new Map()
 
   async findById(id: string): Promise<User | null> {
     return this.users.get(id) ?? null
@@ -32,7 +34,17 @@ export class InMemoryUserRepository implements UserRepository {
     this.users.set(user.id, user)
   }
 
+  async linkStudent(userId: string, studentId: string): Promise<void> {
+    this.studentLinks.set(userId, studentId)
+  }
+
+  async linkTeacher(userId: string, teacherId: string): Promise<void> {
+    this.teacherLinks.set(userId, teacherId)
+  }
+
   clear(): void {
     this.users.clear()
+    this.studentLinks.clear()
+    this.teacherLinks.clear()
   }
 }

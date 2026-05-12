@@ -56,6 +56,7 @@ export class RegisterStudentUseCase {
       updatedAt: new Date(),
     })
     await this.studentRepository.save(student)
+    await this.userRepository.linkStudent(user.id, student.id)
 
     const token = this.tokenService.generateAccessToken({
       userId: user.id,

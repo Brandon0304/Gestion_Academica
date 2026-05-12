@@ -2,7 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { CreateStudentUseCase } from './create-student.use-case.js'
 import { UpdateStudentUseCase } from './update-student.use-case.js'
 import { InMemoryStudentRepository } from '../../../infrastructure/persistence/repositories/in-memory/in-memory-student.repository.js'
+import { InMemoryUserRepository } from '../../../infrastructure/persistence/repositories/in-memory/in-memory-user.repository.js'
 import { NotFoundError } from '../../../shared/errors/index.js'
+
+const mockPasswordHasher = {
+  hash: async (p: string) => p,
+  compare: async (p: string, h: string) => p === h,
+}
 
 describe('UpdateStudentUseCase', () => {
   let repo: InMemoryStudentRepository
@@ -11,7 +17,7 @@ describe('UpdateStudentUseCase', () => {
 
   beforeEach(() => {
     repo = new InMemoryStudentRepository()
-    createUseCase = new CreateStudentUseCase(repo)
+    createUseCase = new CreateStudentUseCase(repo, new InMemoryUserRepository(), mockPasswordHasher)
     updateUseCase = new UpdateStudentUseCase(repo)
   })
 

@@ -4,7 +4,7 @@ import { JwtTokenService } from '../auth/jwt-token.service.js'
 import { BcryptPasswordHasher } from '../auth/bcrypt-password-hasher.js'
 
 import { LoginUseCase, GetMeUseCase, RegisterStudentUseCase, ChangePasswordUseCase, RefreshTokenUseCase } from '../../application/use-cases/auth/index.js'
-import { ListUsersUseCase, UpdateUserUseCase } from '../../application/use-cases/users/index.js'
+import { ListUsersUseCase, UpdateUserUseCase, CreateUserUseCase } from '../../application/use-cases/users/index.js'
 import { CreateStudentUseCase, GetStudentUseCase, ListStudentsUseCase, UpdateStudentUseCase, DeleteStudentUseCase } from '../../application/use-cases/students/index.js'
 import { CreateTeacherUseCase, GetTeacherUseCase, ListTeachersUseCase, UpdateTeacherUseCase, DeleteTeacherUseCase } from '../../application/use-cases/teachers/index.js'
 import { CreateSubjectUseCase, GetSubjectUseCase, ListSubjectsUseCase, UpdateSubjectUseCase, DeleteSubjectUseCase } from '../../application/use-cases/subjects/index.js'
@@ -63,6 +63,7 @@ const refreshTokenUseCase = new RefreshTokenUseCase(tokenService)
 // User use cases
 const listUsersUseCase = new ListUsersUseCase(userRepository)
 const updateUserUseCase = new UpdateUserUseCase(userRepository)
+const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher)
 
 // Domain services
 const emailSender = new ConsoleEmailSender()
@@ -72,14 +73,14 @@ export const notificationService = new NotificationService(emailSender)
 const enrollmentValidator = new EnrollmentValidator(academicPeriodRepository, courseRepository, enrollmentRepository, subjectRepository)
 
 // Student use cases
-const createStudentUseCase = new CreateStudentUseCase(studentRepository, auditService)
+const createStudentUseCase = new CreateStudentUseCase(studentRepository, userRepository, passwordHasher, auditService)
 const getStudentUseCase = new GetStudentUseCase(studentRepository)
 const listStudentsUseCase = new ListStudentsUseCase(studentRepository)
 const updateStudentUseCase = new UpdateStudentUseCase(studentRepository)
 const deleteStudentUseCase = new DeleteStudentUseCase(studentRepository)
 
 // Teacher use cases
-const createTeacherUseCase = new CreateTeacherUseCase(teacherRepository, auditService)
+const createTeacherUseCase = new CreateTeacherUseCase(teacherRepository, userRepository, passwordHasher, auditService)
 const getTeacherUseCase = new GetTeacherUseCase(teacherRepository)
 const listTeachersUseCase = new ListTeachersUseCase(teacherRepository)
 const updateTeacherUseCase = new UpdateTeacherUseCase(teacherRepository)
@@ -145,7 +146,7 @@ const getTeacherTimetableUseCase = new GetTeacherTimetableUseCase(courseReposito
 
 // Controllers
 export const authController = new AuthController(loginUseCase, getMeUseCase, tokenService, registerStudentUseCase, changePasswordUseCase, refreshTokenUseCase)
-export const usersController = new UsersController(listUsersUseCase, updateUserUseCase)
+export const usersController = new UsersController(listUsersUseCase, updateUserUseCase, createUserUseCase)
 export const studentsController = new StudentsController(createStudentUseCase, getStudentUseCase, listStudentsUseCase, updateStudentUseCase, deleteStudentUseCase)
 export const teachersController = new TeachersController(createTeacherUseCase, getTeacherUseCase, listTeachersUseCase, updateTeacherUseCase, deleteTeacherUseCase)
 export const subjectsController = new SubjectsController(createSubjectUseCase, getSubjectUseCase, listSubjectsUseCase, updateSubjectUseCase, deleteSubjectUseCase)

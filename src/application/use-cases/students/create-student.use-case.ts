@@ -1,5 +1,8 @@
 import { Student } from '../../../domain/entities/student.js'
 import type { StudentRepository } from '../../../domain/repositories/student-repository.js'
+import type { UserRepository } from '../../../domain/repositories/user-repository.js'
+import type { PasswordHasher } from '../../ports/password-hasher.js'
+import { User } from '../../../domain/entities/user.js'
 import { Email } from '../../../domain/value-objects/email.js'
 import { DocumentId } from '../../../domain/value-objects/document-id.js'
 import { ConflictError } from '../../../shared/errors/index.js'
@@ -10,6 +13,8 @@ import type { AuditServicePort } from '../../ports/audit-service.js'
 export class CreateStudentUseCase {
   constructor(
     private readonly studentRepository: StudentRepository,
+    private readonly userRepository: UserRepository,
+    private readonly passwordHasher: PasswordHasher,
     private readonly auditService?: AuditServicePort,
   ) {}
 
@@ -43,6 +48,25 @@ export class CreateStudentUseCase {
     })
 
     await this.studentRepository.save(student)
+
+    if (input.password) {
+      const userExists = await this.userRepository.findByEmail(email)
+      if (!userExists) {
+        const passwordHash = await this.passwordHasher.hash(input.password)
+        const user = User.create({
+          id: uuid(),
+          email,
+          passwordHash,
+          role: 'student',
+          isActive: true,
+          lastLogin: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        await this.userRepository.save(user)
+        await this.userRepository.linkStudent(user.id, student.id)
+      }
+    }
 
     await this.auditService?.record({ action: 'CREATE', entityType: 'student', entityId: student.id })
 

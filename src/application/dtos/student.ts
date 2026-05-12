@@ -6,6 +6,7 @@ export interface CreateStudentInput {
   birthDate?: string
   phone?: string
   address?: string
+  password?: string
 }
 
 export interface UpdateStudentInput {

@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { CreateStudentUseCase } from './create-student.use-case.js'
 import { InMemoryStudentRepository } from '../../../infrastructure/persistence/repositories/in-memory/in-memory-student.repository.js'
+import { InMemoryUserRepository } from '../../../infrastructure/persistence/repositories/in-memory/in-memory-user.repository.js'
 import { ConflictError } from '../../../shared/errors/index.js'
+
+const mockPasswordHasher = {
+  hash: async (p: string) => p,
+  compare: async (p: string, h: string) => p === h,
+}
 
 describe('CreateStudentUseCase', () => {
   let repo: InMemoryStudentRepository
@@ -9,7 +15,7 @@ describe('CreateStudentUseCase', () => {
 
   beforeEach(() => {
     repo = new InMemoryStudentRepository()
-    useCase = new CreateStudentUseCase(repo)
+    useCase = new CreateStudentUseCase(repo, new InMemoryUserRepository(), mockPasswordHasher)
   })
 
   it('should create student', async () => {

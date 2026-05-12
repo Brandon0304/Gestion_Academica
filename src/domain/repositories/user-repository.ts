@@ -7,4 +7,6 @@ export interface UserRepository {
   findAll(page: number, pageSize: number): Promise<{ users: User[]; total: number }>
   save(user: User): Promise<void>
   update(user: User): Promise<void>
+  linkStudent(userId: string, studentId: string): Promise<void>
+  linkTeacher(userId: string, teacherId: string): Promise<void>
 }
