@@ -1,0 +1,5 @@
+export { CreateClassroomUseCase } from './create-classroom.use-case.js'
+export { GetClassroomUseCase } from './get-classroom.use-case.js'
+export { ListClassroomsUseCase } from './list-classrooms.use-case.js'
+export { UpdateClassroomUseCase } from './update-classroom.use-case.js'
+export { DeleteClassroomUseCase } from './delete-classroom.use-case.js'

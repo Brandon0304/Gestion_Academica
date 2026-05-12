@@ -1,0 +1,5 @@
+export { CreateTeacherUseCase } from './create-teacher.use-case.js'
+export { GetTeacherUseCase } from './get-teacher.use-case.js'
+export { ListTeachersUseCase } from './list-teachers.use-case.js'
+export { UpdateTeacherUseCase } from './update-teacher.use-case.js'
+export { DeleteTeacherUseCase } from './delete-teacher.use-case.js'

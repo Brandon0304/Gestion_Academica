@@ -1,0 +1,311 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StudentStatus {
+  active
+  inactive
+  graduated
+  suspended
+}
+
+enum TeacherStatus {
+  active
+  inactive
+}
+
+enum CourseStatus {
+  open
+  closed
+  in_progress
+  finished
+}
+
+enum EnrollmentStatus {
+  enrolled
+  approved
+  failed
+  withdrawn
+}
+
+enum AcademicPeriodStatus {
+  planned
+  active
+  closed
+}
+
+enum StudyPlanStatus {
+  draft
+  active
+  replaced
+}
+
+enum PrerequisiteType {
+  required
+  recommended
+}
+
+enum ClassroomType {
+  classroom
+  laboratory
+  workshop
+}
+
+enum UserRole {
+  admin
+  directive
+  teacher
+  student
+  secretary
+}
+
+model Student {
+  id              String          @id @default(uuid()) @db.Uuid
+  firstName       String          @map("first_name") @db.VarChar(100)
+  lastName        String          @map("last_name") @db.VarChar(100)
+  email           String          @unique @db.VarChar(255)
+  documentId      String          @unique @map("document_id") @db.VarChar(20)
+  birthDate       DateTime?       @map("birth_date") @db.Date
+  phone           String?         @db.VarChar(20)
+  address         String?         @db.Text
+  enrollmentDate  DateTime        @map("enrollment_date") @db.Date
+  status          StudentStatus   @default(active)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  deletedAt       DateTime?       @map("deleted_at")
+
+  enrollments Enrollment[]
+  users       StudentUser[]
+
+  @@map("students")
+}
+
+model Teacher {
+  id          String          @id @default(uuid()) @db.Uuid
+  firstName   String          @map("first_name") @db.VarChar(100)
+  lastName    String          @map("last_name") @db.VarChar(100)
+  email       String          @unique @db.VarChar(255)
+  documentId  String          @unique @map("document_id") @db.VarChar(20)
+  specialty   String?         @db.VarChar(255)
+  degree      String?         @db.VarChar(255)
+  hireDate    DateTime        @map("hire_date") @db.Date
+  status      TeacherStatus   @default(active)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  deletedAt   DateTime?       @map("deleted_at")
+
+  courses Course[]
+  users   TeacherUser[]
+
+  @@map("teachers")
+}
+
+model Subject {
+  id            String          @id @default(uuid()) @db.Uuid
+  code          String          @unique @db.VarChar(20)
+  name          String          @db.VarChar(200)
+  description   String?         @db.Text
+  credits       Int
+  theoryHours   Int             @default(0) @map("theory_hours")
+  practiceHours Int             @default(0) @map("practice_hours")
+  studyPlanId   String?         @map("study_plan_id") @db.Uuid
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  deletedAt     DateTime?       @map("deleted_at")
+
+  studyPlan      StudyPlan?      @relation(fields: [studyPlanId], references: [id])
+  courses        Course[]
+  prerequisites  Prerequisite[]  @relation("SubjectPrerequisites")
+  prerequisitesFor Prerequisite[] @relation("SubjectPrerequisiteFor")
+
+  @@map("subjects")
+}
+
+model StudyPlan {
+  id           String           @id @default(uuid()) @db.Uuid
+  name         String           @db.VarChar(200)
+  code         String           @unique @db.VarChar(20)
+  description  String?          @db.Text
+  year         Int
+  totalCredits Int              @map("total_credits")
+  status       StudyPlanStatus  @default(draft)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  deletedAt    DateTime?        @map("deleted_at")
+
+  subjects Subject[]
+
+  @@map("study_plans")
+}
+
+model Prerequisite {
+  id              String            @id @default(uuid()) @db.Uuid
+  subjectId       String            @map("subject_id") @db.Uuid
+  prerequisiteId  String            @map("prerequisite_id") @db.Uuid
+  type            PrerequisiteType  @default(required)
+
+  subject      Subject @relation("SubjectPrerequisites", fields: [subjectId], references: [id])
+  prerequisite Subject @relation("SubjectPrerequisiteFor", fields: [prerequisiteId], references: [id])
+
+  @@unique([subjectId, prerequisiteId])
+  @@map("prerequisites")
+}
+
+model AcademicPeriod {
+  id               String                @id @default(uuid()) @db.Uuid
+  name             String                @db.VarChar(100)
+  startDate        DateTime              @map("start_date") @db.Date
+  endDate          DateTime              @map("end_date") @db.Date
+  enrollmentStart  DateTime              @map("enrollment_start") @db.Date
+  enrollmentEnd    DateTime              @map("enrollment_end") @db.Date
+  status           AcademicPeriodStatus  @default(planned)
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+  deletedAt        DateTime?             @map("deleted_at")
+
+  courses Course[]
+
+  @@map("academic_periods")
+}
+
+model Classroom {
+  id        String         @id @default(uuid()) @db.Uuid
+  code      String         @unique @db.VarChar(20)
+  name      String?        @db.VarChar(100)
+  capacity  Int
+  type      ClassroomType  @default(classroom)
+  location  String?        @db.VarChar(255)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  deletedAt DateTime?      @map("deleted_at")
+
+  courses Course[]
+
+  @@map("classrooms")
+}
+
+model Course {
+  id               String       @id @default(uuid()) @db.Uuid
+  code             String       @unique @db.VarChar(20)
+  name             String       @db.VarChar(200)
+  description      String?      @db.Text
+  credits          Int
+  maxCapacity      Int          @map("max_capacity")
+  subjectId        String       @map("subject_id") @db.Uuid
+  teacherId        String       @map("teacher_id") @db.Uuid
+  academicPeriodId String       @map("academic_period_id") @db.Uuid
+  classroomId      String?      @map("classroom_id") @db.Uuid
+  schedule         Json?        @db.JsonB
+  status           CourseStatus @default(open)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at")
+
+  subject         Subject        @relation(fields: [subjectId], references: [id])
+  teacher         Teacher        @relation(fields: [teacherId], references: [id])
+  academicPeriod  AcademicPeriod @relation(fields: [academicPeriodId], references: [id])
+  classroom       Classroom?     @relation(fields: [classroomId], references: [id])
+  enrollments     Enrollment[]
+
+  @@index([subjectId, academicPeriodId])
+  @@index([teacherId])
+  @@index([academicPeriodId])
+  @@map("courses")
+}
+
+model Enrollment {
+  id              String           @id @default(uuid()) @db.Uuid
+  studentId       String           @map("student_id") @db.Uuid
+  courseId        String           @map("course_id") @db.Uuid
+  enrollmentDate  DateTime         @default(now()) @map("enrollment_date")
+  status          EnrollmentStatus @default(enrolled)
+  finalGrade      Decimal?         @map("final_grade") @db.Decimal(5, 2)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  deletedAt       DateTime?        @map("deleted_at")
+
+  student Student  @relation(fields: [studentId], references: [id])
+  course   Course  @relation(fields: [courseId], references: [id])
+  grades   Grade[]
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model Grade {
+  id             String   @id @default(uuid()) @db.Uuid
+  enrollmentId   String   @map("enrollment_id") @db.Uuid
+  evaluationType String   @map("evaluation_type") @db.VarChar(50)
+  value          Decimal  @db.Decimal(5, 2)
+  percentage     Decimal  @db.Decimal(5, 2)
+  maxValue       Decimal  @default(20) @map("max_value") @db.Decimal(5, 2)
+  observation    String?  @db.Text
+  registeredAt   DateTime @default(now()) @map("registered_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+
+  @@index([enrollmentId])
+  @@map("grades")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  role         UserRole
+  isActive     Boolean  @default(true) @map("is_active")
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  students StudentUser[]
+  teachers TeacherUser[]
+
+  @@map("users")
+}
+
+model StudentUser {
+  userId    String   @map("user_id") @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@id([userId, studentId])
+  @@map("student_users")
+}
+
+model TeacherUser {
+  userId    String   @map("user_id") @db.Uuid
+  teacherId String   @map("teacher_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  @@id([userId, teacherId])
+  @@map("teacher_users")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  action      String   @db.VarChar(50)
+  entityType  String   @map("entity_type") @db.VarChar(50)
+  entityId    String?  @map("entity_id") @db.VarChar(100)
+  metadata    Json?    @db.JsonB
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}

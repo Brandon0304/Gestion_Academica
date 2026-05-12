@@ -1,0 +1,319 @@
+{
+  "info": {
+    "name": "G_ACADEMICA",
+    "description": "API de gestión académica",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "url", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token', jsonData.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@academia.edu\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{url}}/api/v1/auth/login", "host": ["{{url}}"], "path": ["api", "v1", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/auth/me", "host": ["{{url}}"], "path": ["api", "v1", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "List Students",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{url}}/api/v1/students?page=1&pageSize=20",
+              "host": ["{{url}}"], "path": ["api", "v1", "students"],
+              "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "Get Student by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/students/{{studentId}}", "host": ["{{url}}"], "path": ["api", "v1", "students", "{{studentId}}"] }
+          }
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Pedro\",\n  \"lastName\": \"García\",\n  \"email\": \"pedro.garcia@academia.edu\",\n  \"documentId\": \"EST-010\",\n  \"phone\": \"777-9999\",\n  \"address\": \"Calle Real #456\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/students", "host": ["{{url}}"], "path": ["api", "v1", "students"] }
+          }
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Pedro Updated\",\n  \"phone\": \"777-0000\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/students/{{studentId}}", "host": ["{{url}}"], "path": ["api", "v1", "students", "{{studentId}}"] }
+          }
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{url}}/api/v1/students/{{studentId}}", "host": ["{{url}}"], "path": ["api", "v1", "students", "{{studentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teachers",
+      "item": [
+        {
+          "name": "List Teachers",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/teachers", "host": ["{{url}}"], "path": ["api", "v1", "teachers"] }
+          }
+        },
+        {
+          "name": "Get Teacher by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/teachers/{{teacherId}}", "host": ["{{url}}"], "path": ["api", "v1", "teachers", "{{teacherId}}"] }
+          }
+        },
+        {
+          "name": "Create Teacher",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Laura\",\n  \"lastName\": \"Fernández\",\n  \"email\": \"laura.fernandez@academia.edu\",\n  \"documentId\": \"DOC-010\",\n  \"specialty\": \"Base de Datos\",\n  \"degree\": \"Magíster\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/teachers", "host": ["{{url}}"], "path": ["api", "v1", "teachers"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subjects",
+      "item": [
+        {
+          "name": "List Subjects",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/subjects", "host": ["{{url}}"], "path": ["api", "v1", "subjects"] }
+          }
+        },
+        {
+          "name": "Create Subject",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"WEB101\",\n  \"name\": \"Desarrollo Web\",\n  \"credits\": 4,\n  \"theoryHours\": 2,\n  \"practiceHours\": 3\n}" },
+            "url": { "raw": "{{url}}/api/v1/subjects", "host": ["{{url}}"], "path": ["api", "v1", "subjects"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Study Plans",
+      "item": [
+        {
+          "name": "List Study Plans",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/study-plans", "host": ["{{url}}"], "path": ["api", "v1", "study-plans"] }
+          }
+        },
+        {
+          "name": "Create Study Plan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ingeniería de Software\",\n  \"code\": \"ISW-2025\",\n  \"year\": 2025,\n  \"totalCredits\": 210,\n  \"description\": \"Plan 2025 de Ingeniería de Software\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/study-plans", "host": ["{{url}}"], "path": ["api", "v1", "study-plans"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Academic Periods",
+      "item": [
+        {
+          "name": "List Academic Periods",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/academic-periods", "host": ["{{url}}"], "path": ["api", "v1", "academic-periods"] }
+          }
+        },
+        {
+          "name": "Create Academic Period",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Semestre 2025-A\",\n  \"startDate\": \"2025-02-01\",\n  \"endDate\": \"2025-06-30\",\n  \"enrollmentStart\": \"2025-01-01\",\n  \"enrollmentEnd\": \"2025-02-15\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/academic-periods", "host": ["{{url}}"], "path": ["api", "v1", "academic-periods"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Classrooms",
+      "item": [
+        {
+          "name": "List Classrooms",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/classrooms", "host": ["{{url}}"], "path": ["api", "v1", "classrooms"] }
+          }
+        },
+        {
+          "name": "Create Classroom",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"LAB02\",\n  \"name\": \"Laboratorio de Redes\",\n  \"capacity\": 25,\n  \"type\": \"laboratory\",\n  \"location\": \"Edificio C, Piso 1\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/classrooms", "host": ["{{url}}"], "path": ["api", "v1", "classrooms"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "List Courses",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/courses", "host": ["{{url}}"], "path": ["api", "v1", "courses"] }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"C-WEB101-2025A\",\n  \"name\": \"Desarrollo Web\",\n  \"credits\": 4,\n  \"maxCapacity\": 30,\n  \"subjectId\": \"{{subjectId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"academicPeriodId\": \"{{academicPeriodId}}\",\n  \"classroomId\": \"{{classroomId}}\",\n  \"schedule\": {\n    \"days\": [\"monday\", \"wednesday\"],\n    \"startTime\": \"08:00\",\n    \"endTime\": \"09:30\"\n  }\n}" },
+            "url": { "raw": "{{url}}/api/v1/courses", "host": ["{{url}}"], "path": ["api", "v1", "courses"] }
+          }
+        },
+        {
+          "name": "Change Course Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_progress\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/courses/{{courseId}}/status", "host": ["{{url}}"], "path": ["api", "v1", "courses", "{{courseId}}", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "List Enrollments",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/enrollments", "host": ["{{url}}"], "path": ["api", "v1", "enrollments"] }
+          }
+        },
+        {
+          "name": "Create Enrollment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"courseId\": \"{{courseId}}\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/enrollments", "host": ["{{url}}"], "path": ["api", "v1", "enrollments"] }
+          }
+        },
+        {
+          "name": "Change Enrollment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"withdrawn\"\n}" },
+            "url": { "raw": "{{url}}/api/v1/enrollments/{{enrollmentId}}/status", "host": ["{{url}}"], "path": ["api", "v1", "enrollments", "{{enrollmentId}}", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Grades",
+      "item": [
+        {
+          "name": "Get Grades by Enrollment",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/grades/{{enrollmentId}}", "host": ["{{url}}"], "path": ["api", "v1", "grades", "{{enrollmentId}}"] }
+          }
+        },
+        {
+          "name": "Create Grade",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enrollmentId\": \"{{enrollmentId}}\",\n  \"evaluationType\": \"Examen Final\",\n  \"value\": 17,\n  \"percentage\": 40,\n  \"maxValue\": 20\n}" },
+            "url": { "raw": "{{url}}/api/v1/grades", "host": ["{{url}}"], "path": ["api", "v1", "grades"] }
+          }
+        },
+        {
+          "name": "Calculate Final Grade",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{url}}/api/v1/grades/calculate-final/{{enrollmentId}}", "host": ["{{url}}"], "path": ["api", "v1", "grades", "calculate-final", "{{enrollmentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Student Academic History",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/reports/students/{{studentId}}/history", "host": ["{{url}}"], "path": ["api", "v1", "reports", "students", "{{studentId}}", "history"] }
+          }
+        },
+        {
+          "name": "Course Grade Report",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{url}}/api/v1/reports/courses/{{courseId}}/grades", "host": ["{{url}}"], "path": ["api", "v1", "reports", "courses", "{{courseId}}", "grades"] }
+          }
+        }
+      ]
+    }
+  ]
+}

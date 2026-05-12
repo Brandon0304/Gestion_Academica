@@ -1,0 +1,5 @@
+export { StudentEnrolledEvent } from './student-enrolled.event.js'
+export { GradeRegisteredEvent } from './grade-registered.event.js'
+export { CourseCompletedEvent } from './course-completed.event.js'
+export { EnrollmentWithdrawnEvent } from './enrollment-withdrawn.event.js'
+export { StudentRegisteredEvent } from './student-registered.event.js'

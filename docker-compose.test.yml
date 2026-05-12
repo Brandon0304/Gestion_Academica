@@ -1,0 +1,75 @@
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: g_academica_db_test
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: g_academica_test
+    healthcheck:
+      test: pg_isready -U postgres -d g_academica_test
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: g_academica_backend_test
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/g_academica_test
+      NODE_ENV: production
+      JWT_SECRET: test-secret-for-smoke
+      LOG_LEVEL: error
+      RATE_LIMIT_MAX: "1000"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    command: sh -c "npx prisma migrate deploy && npm run db:seed && node dist/src/infrastructure/config/server.js"
+
+  smoke-test:
+    image: node:22-alpine
+    container_name: g_academica_smoke
+    depends_on:
+      backend-test:
+        condition: service_healthy
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      API_URL: http://backend-test:3000
+    command: >
+      sh -c "
+        echo 'Backend is healthy — running smoke tests...' &&
+        npx vitest run --config vitest.config.smoke.ts
+      "
+
+  e2e-test:
+    image: node:22-alpine
+    container_name: g_academica_e2e
+    depends_on:
+      backend-test:
+        condition: service_healthy
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/g_academica_test
+      JWT_SECRET: test-secret-for-e2e
+      NODE_ENV: test
+      RATE_LIMIT_MAX: "10000"
+      LOG_LEVEL: error
+    command: sh /app/scripts/e2e-test.sh

@@ -1,0 +1,5 @@
+export { CreateGradeUseCase } from './create-grade.use-case.js'
+export { GetGradesByEnrollmentUseCase } from './get-grades-by-enrollment.use-case.js'
+export { UpdateGradeUseCase } from './update-grade.use-case.js'
+export { DeleteGradeUseCase } from './delete-grade.use-case.js'
+export { CalculateFinalGradeUseCase } from './calculate-final-grade.use-case.js'
