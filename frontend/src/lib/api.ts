@@ -16,6 +16,11 @@ export class ApiRequestError extends Error {
 
 const BASE = "/api/v1"
 
+function getApiUrl(): string {
+  if (typeof window === "undefined") return ""
+  return process.env.NEXT_PUBLIC_API_URL || window.location.origin
+}
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null
   return localStorage.getItem("auth_token")
@@ -46,7 +51,8 @@ async function request<T>(
   body?: unknown,
   params?: Record<string, string | number | undefined>
 ): Promise<T> {
-  const url = new URL(`${BASE}${path}`, window.location.origin)
+  const apiUrl = getApiUrl()
+  const url = new URL(`${BASE}${path}`, apiUrl)
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined) url.searchParams.set(k, String(v))
