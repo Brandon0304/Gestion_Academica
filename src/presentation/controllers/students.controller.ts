@@ -9,6 +9,8 @@ import {
 } from '../../application/use-cases/students/index.js'
 import { auditService, studentRepository } from '../../infrastructure/config/di.js'
 import { ForbiddenError } from '../../shared/errors/index.js'
+import { createStudentSchema, updateStudentSchema } from '../schemas/student-schemas.js'
+import { ValidationError } from '../../shared/errors/index.js'
 
 export class StudentsController {
   constructor(
@@ -21,7 +23,11 @@ export class StudentsController {
 
   async create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = await this.createStudentUseCase.execute(req.body)
+      const validation = createStudentSchema.safeParse(req.body)
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors.map(e => e.message).join(', '))
+      }
+      const result = await this.createStudentUseCase.execute(validation.data)
       await auditService.record({ userId: req.user?.userId, action: 'CREATE', entityType: 'Student', entityId: result.id })
       res.status(201).json(result)
     } catch (err) {
@@ -66,7 +72,11 @@ export class StudentsController {
   async update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params['id'] as string
-      const result = await this.updateStudentUseCase.execute(id, req.body)
+      const validation = updateStudentSchema.safeParse(req.body)
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors.map(e => e.message).join(', '))
+      }
+      const result = await this.updateStudentUseCase.execute(id, validation.data)
       await auditService.record({ userId: req.user?.userId, action: 'UPDATE', entityType: 'Student', entityId: id })
       res.status(200).json(result)
     } catch (err) {
